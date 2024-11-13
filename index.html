@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Mapbox GL JS map</title>
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="referrer" content="no-referrer">
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.css" rel="stylesheet">
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="map"></div>
+  <script>
+    // TO MAKE THE MAP APPEAR YOU MUST
+    // ADD YOUR ACCESS TOKEN FROM
+    // https://account.mapbox.com
+    // #ifdef APP-PLUS
+    const layers = [
+      {
+        "id": "jianzao_yxst_trunkdivision",
+        "type": "fill",
+        "source": "yuxi_jianzao",
+        "source-layer": "yxst_trunkdivision",
+        "layout": { "visibility": "visible" },
+        "paint": {
+          "fill-color": [
+            "case",
+            ["==", ["get", "number"], 1],
+            "rgba(189, 251, 50, 1)",
+            ["==", ["get", "number"], 2],
+            "rgba(88, 120, 255, 1)",
+            ["==", ["get", "number"], 3],
+            "rgba(29,49,205, 1)",
+            ["==", ["get", "number"], 4],
+            "rgba(1, 154, 188, 1)",
+            ["==", ["get", "number"], 5],
+            "rgba(188, 148, 1, 1)",
+            ["==", ["get", "number"], 6],
+            "rgba(115,203,205, 1)",
+            "rgba(238,73,22, 1)"
+          ],
+          "fill-opacity": 0.2
+        }
+      },
+      {
+        "id": "jianzao_yxst_permanentland",
+        "type": "fill",
+        "source": "yuxi_jianzao",
+        "source-layer": "yxst_permanentland",
+        "layout": { "visibility": "visible" },
+        "paint": { "fill-color": "rgba(140, 127, 96, 0.3)" }
+      },
+      {
+        "id": "jianzao_yxst_pipeline",
+        "type": "line",
+        "source": "yuxi_jianzao",
+        "source-layer": "yxst_pipeline",
+        "layout": { "visibility": "visible" },
+        "paint": {
+          "line-color": [
+            "case",
+            ["==", ["get", "type"], "隧洞"], "rgba(218, 26, 26, 1)",
+            ["==", ["get", "type"], "泄槽"], "rgba(135, 208, 49, 1)",
+            ["==", ["get", "type"], "明渠"], "rgba(31, 45, 191, 1)",
+            ["==", ["get", "type"], "埋管"], "rgba(153, 24, 199, 1)",
+            ["==", ["get", "type"], "明管"], "rgba(153, 124, 19, 1)",
+            ["==", ["get", "type"], "顶管"], "rgba(23, 163, 228, 1)",
+            "rgba(0, 0, 0, 0)"
+          ],
+          "line-width": 1.6
+        }
+      },
+      {
+        "id": "jianzao_yxst_pipeline_null",
+        "type": "line",
+        "source": "yuxi_jianzao",
+        "source-layer": "yxst_pipeline",
+        "filter": ["all", ["==", ["get", "type"], null]],
+        "layout": { "visibility": "visible" },
+        "paint": {
+          "line-width": 1.6,
+          "line-color": "rgba(0, 0, 0, 0)"
+        }
+      },
+      {
+        "id": "jianzao_yxst_yxst_engineering_pipeline_old",
+        "type": "line",
+        "source": "yuxi_jianzao",
+        "source-layer": "yxst_engineering_pipeline_old",
+        "paint": {
+          "line-color": "rgba(100, 91, 91, 1)",
+          "line-width": 1,
+          "line-gap-width": 0,
+          "line-dasharray": [2, 2]
+        },
+        "layout": { "line-cap": "butt" }
+      },
+      {
+        "id": "jianzao_yxst_trunkdivision_symbol",
+        "type": "symbol",
+        "source": "yuxi_jianzao",
+        "source-layer": "yxst_trunkdivision_symbol",
+        "minzoom": 8,
+        "maxzoom": 16,
+        "layout": {
+          "text-field": "{name}",
+          "symbol-placement": "point",
+          "symbol-avoid-edges": false,
+          "text-font": ["Open Sans Regular", "Arial Unicode MS Regular"],
+          "text-optional": false,
+          "symbol-z-order": "auto",
+          "text-letter-spacing": 0,
+          "text-keep-upright": false,
+          "text-transform": "none",
+          "text-allow-overlap": true,
+          "text-ignore-placement": false,
+          "text-pitch-alignment": "auto",
+          "text-rotation-alignment": "auto",
+          "text-size": 16,
+          "text-max-angle": 45,
+          "visibility": "visible",
+          "icon-ignore-placement": false,
+          "icon-allow-overlap": false,
+          "text-offset": [
+            "case",
+            ["==", ["get", "name"], "圣中水库"],
+            ["literal", [-2, -2]],
+            ["literal", [0, 0]],
+          ]
+        }
+      },
+      {
+        "id": "jianzao_yxst_stake",
+        "type": "symbol",
+        "source": "yuxi_jianzao",
+        "source-layer": "yxst_stake",
+        "minzoom": 13,
+        "layout": {
+          "icon-image": "airport_11",
+          "visibility": "visible",
+          "text-field": "{stake_number}",
+          "text-size": 9,
+          "text-justify": "center",
+          "text-anchor": "left",
+          "text-offset": [1, 0],
+          "text-ignore-placement": true,
+        },
+        "paint": { "text-opacity": 0.6 }
+      },
+      {
+        "id": "jianzao_yxst_permanentland_sb",
+        "type": "symbol",
+        "source": "yuxi_jianzao",
+        "source-layer": "yxst_permanentland",
+        "minzoom": 13,
+        "filter": ["all"],
+        "layout": {
+          "text-field": "{name}",
+          "text-size": 8,
+          "icon-rotation-alignment": "auto",
+          "symbol-placement": "point",
+          "symbol-spacing": 250,
+          "symbol-avoid-edges": false,
+          "symbol-z-order": "auto",
+          "text-padding": 200,
+          "text-ignore-placement": true
+        },
+        "paint": { "text-color": "rgba(55, 52, 52, 1)", "text-opacity": 0.8 }
+      },
+      {
+        "id": "jianzao_yxst_pipeline_sb",
+        "type": "symbol",
+        "source": "yuxi_jianzao",
+        "source-layer": "yxst_pipeline",
+        "minzoom": 9.952131165822076,
+        "maxzoom": 24,
+        "layout": {
+          "text-field": ["concat", ["case", ["==", ["get", "name"], null], " ", ["==", ["get", "name"], "<Null>"], " ", ["to-string", ["get", "name"]]], "Φ", ["get", "gj"], "m"],
+          "symbol-placement": "line",
+          "symbol-spacing": 100,
+          "icon-allow-overlap": false,
+          "icon-rotation-alignment": "map",
+          "text-rotate": 0,
+          "text-size": 10,
+          "text-allow-overlap": false,
+          "text-ignore-placement": false,
+          "text-pitch-alignment": "map",
+          "text-rotation-alignment": "map",
+          "text-anchor": "center",
+          "text-offset": [0, 1.2],
+          "icon-padding": 2,
+          "icon-offset": [0, 4],
+          "text-padding": 0,
+          "icon-text-fit": "none",
+          "icon-image": "arrow",
+          "icon-size": 0.5,
+          "text-max-width": 6,
+          "icon-ignore-placement": false,
+          "symbol-z-order": "auto",
+          "text-justify": "center",
+          "text-writing-mode": [],
+          "icon-size": 1.2,
+          "visibility": "visible"
+        },
+        "paint": { "text-color": "#646675", "icon-color": "rgba(59, 55, 55, 1)" }
+      }
+    ]
+
+    const mapSourceUrl = 'https://yxywweb.hdec.com';
+    const servers = [...Array(8).keys()];
+    const keys = [
+      'b9194bd934b22bd4f48b719cf81188c2',
+      '88619ab5f7279c350e05c4344b952d70',
+      '4f54112083d23669db9d67c7d6f9c16b',
+      'b5c990de2f45799b1e0d56e053fcde6d',
+      'c3e208ecead59b86e364e5a0f6f55d37',
+      'f51d3218434091080b15a99e888e3393'
+    ];
+    const serversProxy = new Proxy(servers, {
+      get(target, prop) {
+        if (prop === 'server') {
+          return target[Math.floor(Math.random() * servers.length)];
+        }
+        return target[prop];
+      }
+    });
+    const keyProxy = new Proxy(keys, {
+      get(target, prop) {
+        if (prop === 'key') {
+          return target[Math.floor(Math.random() * keys.length)];
+        }
+        return [prop];
+      }
+    });
+    let layerData = {
+      zoom: 8.170301300699196,
+      pitch: 0,
+      center: [106.56214542653927, 29.735565284210267],
+      sprite: 'https://yxywweb.hdec.com/iserver/services/map-mvt-ChongqingBasemapDeep/restjsr/v1/vectortile/maps/ChongqingBasemapDeep/sprites/sprite',
+      glyphs: 'https://yxywweb.hdec.com/iserver/services/map-mvt-ChongqingBasemapDeep/restjsr/v1/vectortile/maps/ChongqingBasemapDeep/fonts/{fontstack}/{range}',
+      version: 8,
+      sources: {},
+      layers: []
+    };
+    mapboxgl.accessToken = 'pk.eyJ1IjoiOTM0MDk0Mjg2IiwiYSI6ImNsMnNmdmVrZDBrZGMzZG50cHJudXJkbW8ifQ.C0wKhJgrToFJgL8GH5M8rg';
+    const map = new mapboxgl.Map({
+      container: 'map', // container ID
+      minZoom: 0,
+      maxZoom: 17,
+      maxBounds: [
+        [102.12481063891687, 27.8761091581096],
+        [110.1418053775493, 31.277926653107627]
+      ]
+    });
+    function addRasterTileLayer(map, url, sourceId, layerId) {
+      map.addSource(sourceId, {
+        type: 'raster',
+        tiles: [url],
+        tileSize: 256
+      });
+      map.addLayer({
+        id: layerId,
+        type: 'raster',
+        source: sourceId
+      });
+    }
+
+    map.on('load', async () => {
+      const vecwUrl = `https://t${serversProxy.server}.tianditu.gov.cn/img_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=img&tileMatrixSet=w&TileMatrix={z}&TileRow={y}&TileCol={x}&style=default&format=tiles&tk=` + keyProxy.key;
+      const cvawUrl = `https://t${serversProxy.server}.tianditu.gov.cn/cia_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=cia&tileMatrixSet=w&TileMatrix={z}&TileRow={y}&TileCol={x}&style=default&format=tiles&tk=` + keyProxy.key;
+      console.info('🚀🚀', 'vecwUrl -->', vecwUrl, `<-- mapbox.html/`);
+
+      addRasterTileLayer(map, vecwUrl, 'vecw', 'vecw');
+      addRasterTileLayer(map, cvawUrl, 'cvaw', 'cvaw');
+
+      map.addSource('yuxi_jianzao', {
+        'type': 'vector',
+        'scheme': 'tms',
+        'tiles': ['https://yxywweb.hdec.com/yuxi_agent/GeoAgentController3857/yuxi_jianzao/{x}/{y}/{z}'],
+        'minZoom': 0,
+        'maxZoom': 22
+      });
+      for (const jianzaoLayer of layers) {
+        map.addLayer(jianzaoLayer);
+      }
+    })
+    // #endif
+
+
+  </script>
+
+</body>
+
+</html>
